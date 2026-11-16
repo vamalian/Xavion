@@ -1,0 +1,6 @@
+{
+  "name": "Xavion AI",
+  "description": "Futuristic holographic tablet personal AI assistant powered by Gemini Live with real-time voice, vision, device control, and persistent local memory.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

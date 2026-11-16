@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Xavion AI</string>
+    <string name="notification_listener_label">Xavion Notification Reader</string>
+    <string name="service_channel_name">Xavion Assistant Active Session</string>
+    <string name="service_notification_title">Xavion AI Systems Online</string>
+    <string name="service_notification_text">Tap to open holographic cockpit or stop session</string>
+    <string name="cd_xavion_avatar">Xavion AI holographic male avatar</string>
+    <string name="cd_energy_core">Xavion holographic arc energy core</string>
+    <string name="cd_tap_to_talk">Tap to talk to Xavion</string>
+    <string name="cd_settings">Open AI settings</string>
+    <string name="cd_navigation_item">Navigation item</string>
+</resources>
