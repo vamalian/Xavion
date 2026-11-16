@@ -24,8 +24,16 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Android SDK & Accept Licenses
+      - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK Licenses
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          if [ -x "$SDKMANAGER" ]; then
+            yes | "$SDKMANAGER" --licenses > /dev/null || true
+          fi
 
       - name: Set up Gradle & Cache
         uses: gradle/actions/setup-gradle@v4
@@ -52,19 +60,32 @@ jobs:
             fi
           fi
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace --no-daemon
+      - name: Clean and Build Debug APK
+        run: ./gradlew clean assembleDebug --stacktrace --no-daemon
 
-      - name: Locate & Verify Debug APK
+      - name: Verify Debug APK Output
         run: |
           APK_PATH=$(find app/build/outputs/apk/debug -maxdepth 2 -name "*.apk" | head -n 1)
-          if [ -z "$APK_PATH" ] || [ ! -f "$APK_PATH" ]; then
+          if [ -z "$APK_PATH" ] || [ ! -s "$APK_PATH" ]; then
             echo "ERROR: Debug APK was not generated under app/build/outputs/apk/debug."
             exit 1
           fi
           echo "Generated APK: $APK_PATH"
           ls -lh "$APK_PATH"
+          unzip -t "$APK_PATH" > /dev/null
+          APKSIGNER=$(find "${ANDROID_HOME:-$ANDROID_SDK_ROOT}/build-tools" -name "apksigner" 2>/dev/null | sort -V | tail -n 1)
+          if [ -n "$APKSIGNER" ]; then
+            "$APKSIGNER" verify --print-certs "$APK_PATH"
+          fi
           echo "APK_PATH=$APK_PATH" >> "$GITHUB_ENV"
+
+      - name: Print Build Diagnostics on Failure
+        if: failure()
+        run: |
+          echo "=== Java & Environment ==="
+          java -version || true
+          echo "=== Recent Gradle Reports ==="
+          find app/build/reports -maxdepth 3 -type f 2>/dev/null || true
 
       - name: Upload Android Debug APK Artifact
         uses: actions/upload-artifact@v4
