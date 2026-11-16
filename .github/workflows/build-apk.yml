@@ -27,12 +27,16 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Accept Android SDK Licenses
+      - name: Accept Android SDK Licenses & Ensure Required SDK
         run: |
           SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
-          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-          if [ -x "$SDKMANAGER" ]; then
+          SDKMANAGER=$(command -v sdkmanager || find "$SDK_ROOT" -maxdepth 4 -name sdkmanager -type f 2>/dev/null | head -n 1 || true)
+          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset}"
+          echo "SDKMANAGER=${SDKMANAGER:-not_found}"
+          if [ -n "$SDKMANAGER" ] && [ -x "$SDKMANAGER" ]; then
             yes | "$SDKMANAGER" --licenses > /dev/null || true
+            "$SDKMANAGER" --install "platform-tools" "build-tools;36.0.0" "platforms;android-36.1" || true
           fi
 
       - name: Set up Gradle & Cache
@@ -45,6 +49,10 @@ jobs:
             exit 1
           fi
           chmod +x ./gradlew
+          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+            echo "ERROR: gradle/wrapper/gradle-wrapper.jar is missing from repository."
+            exit 1
+          fi
           ./gradlew --version --no-daemon
 
       - name: Prepare Debug Keystore
@@ -73,7 +81,7 @@ jobs:
           echo "Generated APK: $APK_PATH"
           ls -lh "$APK_PATH"
           unzip -t "$APK_PATH" > /dev/null
-          APKSIGNER=$(find "${ANDROID_HOME:-$ANDROID_SDK_ROOT}/build-tools" -name "apksigner" 2>/dev/null | sort -V | tail -n 1)
+          APKSIGNER=$(find "${ANDROID_HOME:-$ANDROID_SDK_ROOT}/build-tools" -name "apksigner" 2>/dev/null | sort -V | tail -n 1 || true)
           if [ -n "$APKSIGNER" ]; then
             "$APKSIGNER" verify --print-certs "$APK_PATH"
           fi
@@ -84,6 +92,8 @@ jobs:
         run: |
           echo "=== Java & Environment ==="
           java -version || true
+          SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          ls -la "$SDK_ROOT/platforms" "$SDK_ROOT/build-tools" "$SDK_ROOT/licenses" 2>/dev/null || true
           echo "=== Recent Gradle Reports ==="
           find app/build/reports -maxdepth 3 -type f 2>/dev/null || true
 
