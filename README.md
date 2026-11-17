@@ -79,11 +79,11 @@ export KEY_PASSWORD=your_key_password
 Output APK: `app/build/outputs/apk/release/app-release.apk`
 
 ### GitHub Actions CI (Automatic Debug APK)
-A ready-to-run workflow is included at `.github/workflows/build-apk.yml`. It triggers automatically on pushes to `main` or `master`, pull requests, and manual `workflow_dispatch` runs, builds `./gradlew assembleDebug --stacktrace --no-daemon`, and uploads **`Android-Debug-APK`** (30-day retention).
+A ready-to-run workflow is included at `.github/workflows/build-apk.yml`. It triggers automatically on pushes to `main` or `master`, pull requests, and manual `workflow_dispatch` runs, builds `./gradlew clean assembleDebug --stacktrace --no-daemon`, and uploads **`XAVION-AI-DEBUG-APK`** (30-day retention).
 
 #### Download & Install on an Android Tablet
 1. Open your GitHub repository → **Actions** tab → select the latest **Build Android Debug APK** workflow run.
-2. Under **Artifacts**, click **Android-Debug-APK** to download the ZIP archive, then extract `app-debug.apk`.
+2. Under **Artifacts**, click **XAVION-AI-DEBUG-APK** to download the ZIP archive, then extract `app-debug.apk`.
 3. Transfer `app-debug.apk` to your Android tablet (or download it directly in the tablet's browser from GitHub).
 4. On the tablet, open the file from the **Files** app and allow **Install unknown apps** for your file manager/browser if prompted.
 5. Tap **Install** and launch **Xavion AI**.
